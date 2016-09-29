@@ -1,0 +1,4 @@
+Warning[2066] list.c 68 : type qualifier mismatch in assignment
+Warning[2066] list.c 76 : type qualifier mismatch in assignment
+Warning[2066] list.c 77 : type qualifier mismatch in assignment
+Warning[2066] list.c 150 : type qualifier mismatch in assignment
