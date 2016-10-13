@@ -27,11 +27,13 @@
 #include "task.h"
 //#include "stdio.h"
 #include <usart.h>
+#include "serial.h"
+
 
 #define PRIORITY_TASK0		( tskIDLE_PRIORITY + 1 )
 #define PRIORITY_TASK1		( tskIDLE_PRIORITY + 2 )
 #define PRIORITY_TASK2		( tskIDLE_PRIORITY + 3 )
-#define PRIORITY_TASK3		( tskIDLE_PRIORITY + 3 )
+#define PRIORITY_TASK3		( tskIDLE_PRIORITY + 4 )
 volatile unsigned char BOR_Flag = 0x05;
 volatile unsigned char POR_Flag = 0x05;
 volatile unsigned char MCLR_Flag = 0x05;
@@ -44,6 +46,12 @@ size_t freeHeap;
 volatile unsigned long uIdleCycleCount = 0UL;
 volatile unsigned long uLastIdleCycleCount=0UL;
 volatile unsigned long uDiffIdleCycleCount=0UL;
+xComPortHandle xCOMUsart=0;
+/* Constants required for the communications.  Only one character is ever 
+transmitted. */
+#define mainCOMMS_QUEUE_LENGTH			( 5 )
+#define mainNO_BLOCK					( ( portTickType ) 0 )
+#define mainBAUD_RATE					( ( unsigned long ) 9600 )
 
 /*************************** Tasks Prototypes ****************************/
 //static const char *pcTextForTask0 = "Tarea 0\n";
@@ -57,6 +65,12 @@ static void vTASK3( void *pvParameters );
 
 /*-----------------------------------------------------------*/
 void main( void ){
+    // Oscillator Configuration
+    OSCCON = 0b01111100; // 64MHz to 16MIPS oscillator configuration
+    OSCCON2 = 0b01000010;
+    OSCTUNE = 0b11000000;
+    Nop();
+    Nop();
     //ResetInfo();
     if (isBOR()) {
         BOR_Flag = 0x0A;
@@ -109,11 +123,13 @@ void main( void ){
     Nop();
     Nop();
     
-    baud1USART(BAUD_IDLE_TX_PIN_STATE_HIGH & BAUD_16_BIT_RATE & BAUD_WAKEUP_OFF & BAUD_AUTO_OFF & USART_BRGH_HIGH);
+    xCOMUsart= xSerialPortInitMinimal(mainBAUD_RATE,mainCOMMS_QUEUE_LENGTH);
+    xSerialPutChar( xCOMUsart, 's', 10 );
+    /*baud1USART(BAUD_IDLE_TX_PIN_STATE_HIGH & BAUD_16_BIT_RATE & BAUD_WAKEUP_OFF & BAUD_AUTO_OFF & USART_BRGH_HIGH);
     Open1USART(USART_TX_INT_OFF & USART_RX_INT_OFF & USART_ASYNCH_MODE & USART_EIGHT_BIT & USART_CONT_RX, 277); //baudrate 57600
     TXREG1 = 0;
     printf(" \n");
-    printf("inicio\n");
+    printf("inicio\n");*/
     LED_MANUAL_OFF();
     LED_AUTO_OFF();
     LED_MOTOR_OFF();
@@ -148,9 +164,9 @@ static void vTASK0( void *pvParameters ){
 		//LATBbits.LATB0=!PORTBbits.RB0;
         //printf(pcTaskName);
         freeHeap = xPortGetFreeHeapSize();
-        printf("Tarea0\n");
+        //printf("Tarea0\n");
         uDiffIdleCycleCount=uIdleCycleCount-uLastIdleCycleCount;
-        printf("Idle= %lu\n",uDiffIdleCycleCount);
+        //printf("Idle= %lu\n",uDiffIdleCycleCount);
         uLastIdleCycleCount=uIdleCycleCount;
         uIdleCycleCount=0;
         LED_POWER_TOGGLE();
@@ -167,7 +183,7 @@ static void vTASK1( void *pvParameters ){
 	while(1){
 		//LATBbits.LATB1=!PORTBbits.RB1;
         //printf(pcTaskName);
-        printf("Tarea1\n");
+        //printf("Tarea1\n");
         LED_MANUAL_TOGGLE();
 		vTaskDelay(350/portTICK_RATE_MS);
         
@@ -179,7 +195,7 @@ static void vTASK2( void *pvParameters ){
 	while(1){
 		//LATBbits.LATB1=!PORTBbits.RB1;
         //printf(pcTaskName);
-        printf("Tarea2\n");
+        //printf("Tarea2\n");
         LED_AUTO_TOGGLE();
 		vTaskDelay(450/portTICK_RATE_MS);
         
@@ -187,12 +203,15 @@ static void vTASK2( void *pvParameters ){
 }
 static void vTASK3( void *pvParameters ){
     //char *pcTaskName=(char*)pvParameters;
+    portTickType xLastWakeTime;
+    xLastWakeTime=xTaskGetTickCount();
 	while(1){
 		//LATBbits.LATB1=!PORTBbits.RB1;
         //printf(pcTaskName);
-        printf("Tarea3\n");
+        
+        //printf("Tarea3\n");
         LED_NIVEL_TOGGLE();
-		vTaskDelay(1000/portTICK_RATE_MS);
+		vTaskDelayUntil(&xLastWakeTime,1000/portTICK_RATE_MS);
         
 	}
 }

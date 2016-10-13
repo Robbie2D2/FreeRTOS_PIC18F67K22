@@ -1,0 +1,8 @@
+Warning[2074] serial.c 207 : location PRODH specified in the interrupt save list is redundant
+Warning[2074] serial.c 207 : location PRODL specified in the interrupt save list is redundant
+Warning[2074] serial.c 207 : location TABLAT specified in the interrupt save list is redundant
+Warning[2074] serial.c 207 : location .tmpdata specified in the interrupt save list is redundant
+Warning[2074] serial.c 234 : location PRODH specified in the interrupt save list is redundant
+Warning[2074] serial.c 234 : location PRODL specified in the interrupt save list is redundant
+Warning[2074] serial.c 234 : location TABLAT specified in the interrupt save list is redundant
+Warning[2074] serial.c 234 : location .tmpdata specified in the interrupt save list is redundant

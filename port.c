@@ -549,7 +549,7 @@ void vPortYield( void )
 static void prvLowInterrupt( void )
 {
 	/* Was the interrupt the tick? */
-   // Nop();
+    Nop();
     if(PIR4bits.CCP4IF==1)
     //if(PIR1bits.TMR1IF)
     //if((PIE1bits.TMR1IE == 1) && (PIR1bits.TMR1IF==1))
@@ -557,7 +557,7 @@ static void prvLowInterrupt( void )
     //if((INTCONbits.TMR0IE == 1) && (INTCONbits.TMR0IF == 1)) 
     //if(INTCONbits.TMR0IF)
 	{		
-        //Config timer0 1 ms a 60MHz/4
+        //Config timer0 1 ms a 64MHz/4
 //        T0CONbits.T08BIT = 0;
 //        T0CONbits.T0CS = 0;
 //        T0CONbits.PSA = 1;
@@ -567,8 +567,8 @@ static void prvLowInterrupt( void )
         TMR1H = 0xC1;             // preset for timer1 MSB register
         TMR1L = 0x80;             // preset for timer1 LSB register*/
         //PIR4bits.CCP4IF=portBIT_CLEAR;//0;
-        TMR1H = ( unsigned char ) 0x00;
-        TMR1L = ( unsigned char ) 0x00;
+        //TMR1H = ( unsigned char ) 0x00;
+        //TMR1L = ( unsigned char ) 0x00;
 		_asm
 			goto prvTickISR
 		_endasm
@@ -654,6 +654,10 @@ unsigned char ucByte;
 	CCPR1L = ( unsigned char ) ( ulCompareValue & ( unsigned long ) 0xff );
 	ulCompareValue >>= ( unsigned long ) 8;
 	CCPR1H = ( unsigned char ) ( ulCompareValue & ( unsigned long ) 0xff );	
+    
+    /* We are only going to use the global interrupt bit, so set the peripheral
+	bit to true. */
+	INTCONbits.GIEL = portBIT_SET;
 
 //	CCP1CONbits.CCP1M0 = portBIT_SET;	/*< Compare match mode. */
 //	CCP1CONbits.CCP1M1 = portBIT_SET;	/*< Compare match mode. */
@@ -697,9 +701,7 @@ unsigned char ucByte;
 //    T1CONbits.RD16 = 1;
 //    T1CONbits.TMR1ON = 1;
   
-    /* We are only going to use the global interrupt bit, so set the peripheral
-	bit to true. */
-	INTCONbits.GIEL = portBIT_SET;
+    
     
     
     
